@@ -5,8 +5,8 @@
     - name: Copy the site from dev to local temporary directory
       synchronize: src=/cwis/http/htdocs/hdyami dest=/home/hailu/ansible/tmp
       become: true
-      become_user: root
       become_method: sudo
+      become_user: root
       become_flags: '-i'
 
 ...
