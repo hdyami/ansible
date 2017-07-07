@@ -1,0 +1,11 @@
+---
+- hosts: dev
+  # become: true
+  tasks:
+    - name: Pull target site folder from umwebdev
+      synchronize:
+        mode: pull
+        src: /cwis/http/htdocs/hdyami/
+        dest: /cwis/http/htdocs/hdyami
+        rsync_path: "sudo -i rsync"
+      delegate_to: staging

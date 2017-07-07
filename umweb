@@ -1,0 +1,11 @@
+[dev]
+umwebdev
+
+[staging]
+umwebstaging
+
+[prod]
+web-4
+
+[control]
+localhost ansible_connection=local
