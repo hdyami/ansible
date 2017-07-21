@@ -1,0 +1,10 @@
+---
+- hosts: {{host}}
+  # become: true
+  tasks:
+    - name: Push site from local to staging
+      synchronize:
+        mode: push
+        src: tmp/
+        dest: /cwis/http/remote/htdocs/{{sitename}}
+        rsync_path: "sudo -i rsync"

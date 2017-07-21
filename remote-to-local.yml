@@ -1,0 +1,12 @@
+---
+- hosts: {{host}}
+  # become: true
+  tasks:
+    - name: Pull target site folder from umwebdev
+      synchronize:
+        mode: pull
+        src: /cwis/http/htdocs/{{sitename}}/
+        dest: tmp
+        rsync_path: "sudo -i rsync"
+        # rsync_opts:
+          # - "-P"
