@@ -1,12 +1,44 @@
 ---
-- hosts: {{host}}
+- hosts: '{{ host }}'
   # become: true
   tasks:
-    - name: Pull target site folder from umwebdev
+    # Grab the DB credentials
+    - name: Register list of mysql credentials for given site
+      shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $2}' | sed 's/--database=//g'
+      register: mysql_database_name
+
+    - name: Register list of mysql credentials for given site
+      shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $3}' | sed 's/--host=//g'
+      register: mysql_host_name
+
+    - name: Register list of mysql credentials for given site
+      shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $4}' | sed 's/--user=//g'
+      register: mysql_user_name
+
+    - name: Register list of mysql credentials for given site
+      shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $5}' | sed 's/--password=//g'
+      register: mysql_password
+      
+    # Copy the db, site files and configuration to local temporary directory
+    - name: Dump site DB into a file in the site directory on the remote host
+      mysql_db:
+        state: dump
+        name: '{{ mysql_database_name.stdout }}'
+        login_host: '{{ mysql_host_name.stdout }}'
+        login_user: '{{ mysql_user_name.stdout }}'
+        login_password: '{{ mysql_password.stdout }}'
+        target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+
+    - name: Pull site directory from remote host to local host
       synchronize:
         mode: pull
-        src: /cwis/http/htdocs/{{sitename}}/
+        src: /cwis/http/htdocs/'{{ sitename }}'/
         dest: tmp
         rsync_path: "sudo -i rsync"
-        # rsync_opts:
-          # - "-P"
+
+    - name: Pull site configuration from remote host to local host
+      synchronize:
+        mode: pull
+        src: /etc/httpd/conf.d/drupal-available/'{{ sitename }}'.conf
+        dest: configuration
+        rsync_path: "sudo -i rsync" 

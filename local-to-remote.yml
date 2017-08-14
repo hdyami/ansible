@@ -1,10 +1,21 @@
 ---
-- hosts: {{host}}
+- hosts: '{{host}}'
   # become: true
   tasks:
-    - name: Push site from local to staging
+    - name: Push site codebase from local host to named remote host
       synchronize:
         mode: push
         src: tmp/
         dest: /cwis/http/remote/htdocs/{{sitename}}
         rsync_path: "sudo -i rsync"
+    - name: Push site configuration from remote host to local host
+      synchronize:
+        mode: push
+        src: configuration/{{sitename}}.conf
+        dest: /etc/httpd/conf.d/drupal-available/
+        rsync_path: "sudo -i rsync" 
+    - name: Dump all databases to hostname.sql
+      mysql_db:
+        state: dump
+        name: all
+        target: /tmp/{{ inventory_hostname }}.sql

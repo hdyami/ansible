@@ -1,9 +1,9 @@
-[dev]
-umwebdev
+[development]
+dev
 web-2
 
 [staging]
-umwebstaging
+staging
 
 [prod]
 web-4
