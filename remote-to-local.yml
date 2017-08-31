@@ -2,6 +2,40 @@
 - hosts: '{{ host }}'
   # become: true
   tasks:
+    # Empty tmp folders
+    - name: Empty the local site folder
+      file:
+        path: site/
+        state: absent
+      delegate_to: localhost
+      become: true
+
+    - name: Empty the local config folder
+      file:
+        path: configuration/
+        state: absent
+      delegate_to: localhost
+      become: true
+      
+    # Recreate tmp folders because emptying them also deletes them
+    - name: Create the local site folder
+      file:
+        path: site
+        owner: hdyami
+        group: hdyami
+        mode: 0755
+        state: directory
+      delegate_to: localhost
+
+    - name: Create the local config folder
+      file:
+        path: configuration
+        owner: hdyami
+        group: hdyami
+        mode: 0755
+        state: directory
+      delegate_to: localhost
+
     # Grab the DB credentials
     - name: Register list of mysql credentials for given site
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $2}' | sed 's/--database=//g'
@@ -18,8 +52,8 @@
     - name: Register list of mysql credentials for given site
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $5}' | sed 's/--password=//g'
       register: mysql_password
-      
-    # Copy the db, site files and configuration to local temporary directory
+
+    # Create a db dump remotely
     - name: Dump site DB into a file in the site directory on the remote host
       mysql_db:
         state: dump
@@ -29,11 +63,12 @@
         login_password: '{{ mysql_password.stdout }}'
         target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
 
+    # Copy the db, site files and configuration to local temporary directory
     - name: Pull site directory from remote host to local host
       synchronize:
         mode: pull
         src: /cwis/http/htdocs/'{{ sitename }}'/
-        dest: tmp
+        dest: site
         rsync_path: "sudo -i rsync"
 
     - name: Pull site configuration from remote host to local host
