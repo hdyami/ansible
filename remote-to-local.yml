@@ -16,13 +16,13 @@
         state: absent
       delegate_to: localhost
       become: true
-      
+
     # Recreate tmp folders because emptying them also deletes them
     - name: Create the local site folder
       file:
         path: site
         owner: hdyami
-        group: hdyami
+        group: staff
         mode: 0755
         state: directory
       delegate_to: localhost
@@ -31,7 +31,7 @@
       file:
         path: configuration
         owner: hdyami
-        group: hdyami
+        group: staff
         mode: 0755
         state: directory
       delegate_to: localhost
@@ -67,13 +67,21 @@
     - name: Pull site directory from remote host to local host
       synchronize:
         mode: pull
-        src: /cwis/http/htdocs/'{{ sitename }}'/
+        src: '/cwis/http/htdocs/{{ sitename }}/'
         dest: site
         rsync_path: "sudo -i rsync"
 
     - name: Pull site configuration from remote host to local host
       synchronize:
         mode: pull
-        src: /etc/httpd/conf.d/drupal-available/'{{ sitename }}'.conf
+        src: '/etc/httpd/conf.d/drupal-available/{{ sitename }}.conf'
         dest: configuration
-        rsync_path: "sudo -i rsync" 
+        rsync_path: "sudo -i rsync"
+
+    # Remove remote db dump
+    - name: Remove remote db dump
+      file:
+        path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+        state: absent
+      # become: true
+
