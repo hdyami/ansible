@@ -2,20 +2,21 @@
 - hosts: '{{host}}'
   # become: true
   tasks:
+    # Copy site dir and config to proper place on target host
     - name: Push site codebase from local host to named remote host
       synchronize:
         mode: push
-        src: tmp/
+        src: site/
         dest: /cwis/http/remote/htdocs/{{sitename}}
         rsync_path: "sudo -i rsync"
+        delete: yes
     - name: Push site configuration from remote host to local host
       synchronize:
         mode: push
         src: configuration/{{sitename}}.conf
         dest: /etc/httpd/conf.d/drupal-available/
         rsync_path: "sudo -i rsync" 
-    - name: Dump all databases to hostname.sql
-      mysql_db:
-        state: dump
-        name: all
-        target: /tmp/{{ inventory_hostname }}.sql
+        delete: yes
+    - name: Install DB with drush
+      command: '/usr/bin/drush @{{ sitename }}-{{ host }} sqlc < /cwis/http/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+

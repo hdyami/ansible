@@ -77,3 +77,9 @@
         src: /etc/httpd/conf.d/drupal-available/'{{ sitename }}'.conf
         dest: configuration
         rsync_path: "sudo -i rsync" 
+    # Cleanup    
+    - name: Empty the local site folder
+      file:
+        path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+        state: absent
+      # become: true
