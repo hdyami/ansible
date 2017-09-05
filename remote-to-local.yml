@@ -78,7 +78,7 @@
         dest: configuration
         rsync_path: "sudo -i rsync" 
     # Cleanup    
-    - name: Empty the local site folder
+    - name: Remove the remote db dump
       file:
         path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
         state: absent
