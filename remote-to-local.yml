@@ -76,7 +76,6 @@
         mode: pull
         src: '/etc/httpd/conf.d/drupal-available/{{ sitename }}.conf'
         dest: configuration
-<<<<<<< HEAD
         rsync_path: "sudo -i rsync" 
     # Cleanup    
     - name: Remove the remote db dump
@@ -84,7 +83,6 @@
         path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
         state: absent
       # become: true
-=======
         rsync_path: "sudo -i rsync"
 
     # Remove remote db dump
@@ -94,4 +92,3 @@
         state: absent
       # become: true
 
->>>>>>> a8847654a963ba536bae8882f19d3d0fced53be0
