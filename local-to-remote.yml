@@ -1,22 +1,58 @@
 ---
-- hosts: '{{host}}'
+- hosts: '{{ host }}'
   # become: true
   tasks:
-    # Copy site dir and config to proper place on target host
-    - name: Push site codebase from local host to named remote host
+    # Copy the db, site files and configuration to local temporary directory
+    - name: Push site directory from local host to remote host
       synchronize:
         mode: push
+        dest: '/cwis/http/htdocs/{{ sitename }}'
         src: site/
-        dest: /cwis/http/remote/htdocs/{{sitename}}
-        rsync_path: "sudo -i rsync"
         delete: yes
-    - name: Push site configuration from remote host to local host
+        rsync_path: "sudo -i rsync"
+
+    - name: Pull site configuration from local host to remote host
       synchronize:
         mode: push
-        src: configuration/{{sitename}}.conf
-        dest: /etc/httpd/conf.d/drupal-available/
-        rsync_path: "sudo -i rsync" 
+        dest: '/etc/httpd/conf.d/drupal-available/{{ sitename }}.conf'
+        src: 'configuration/{{ sitename }}.conf'
         delete: yes
-    - name: Install DB with drush
-      command: '/usr/bin/drush @{{ sitename }}-{{ host }} sqlc < /cwis/http/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+        rsync_path: "sudo -i rsync" 
+
+    # # Grab the DB credentials
+    # - name: Register list of mysql credentials for given site
+    #   shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $2}' | sed 's/--database=//g'
+    #   register: mysql_database_name
+
+    # - name: Register list of mysql credentials for given site
+    #   shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $3}' | sed 's/--host=//g'
+    #   register: mysql_host_name
+
+    # - name: Register list of mysql credentials for given site
+    #   shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $4}' | sed 's/--user=//g'
+    #   register: mysql_user_name
+
+    # - name: Register list of mysql credentials for given site
+    #   shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $5}' | sed 's/--password=//g'
+    #   register: mysql_password
+
+
+
+    # # Import the db dump
+    # - name: Dump site DB into a file in the site directory on the remote host
+    #   mysql_db:
+    #     state: import
+    #     name: '{{ mysql_database_name.stdout }}'
+    #     login_host: '{{ mysql_host_name.stdout }}'
+    #     login_user: '{{ mysql_user_name.stdout }}'
+    #     login_password: '{{ mysql_password.stdout }}'
+    #     target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+
+
+    # # Cleanup    
+    # - name: Remove remote db dump
+    #   file:
+    #     path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+    #     state: absent
+    #   # become: true
 

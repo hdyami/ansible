@@ -22,7 +22,7 @@
       file:
         path: site
         owner: hdyami
-        group: staff
+        group: hdyami
         mode: 0755
         state: directory
       delegate_to: localhost
@@ -31,7 +31,7 @@
       file:
         path: configuration
         owner: hdyami
-        group: staff
+        group: hdyami
         mode: 0755
         state: directory
       delegate_to: localhost
@@ -77,13 +77,6 @@
         src: '/etc/httpd/conf.d/drupal-available/{{ sitename }}.conf'
         dest: configuration
         rsync_path: "sudo -i rsync" 
-    # Cleanup    
-    - name: Remove the remote db dump
-      file:
-        path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
-        state: absent
-      # become: true
-        rsync_path: "sudo -i rsync"
 
     # Remove remote db dump
     - name: Remove remote db dump
