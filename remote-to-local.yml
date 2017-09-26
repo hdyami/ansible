@@ -37,19 +37,19 @@
       delegate_to: localhost
 
     # Grab the DB credentials
-    - name: Register list of mysql credentials for given site
+    - name: Register db name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $2}' | sed 's/--database=//g'
       register: mysql_database_name
 
-    - name: Register list of mysql credentials for given site
+    - name: Register host name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $3}' | sed 's/--host=//g'
       register: mysql_host_name
 
-    - name: Register list of mysql credentials for given site
+    - name: Register user name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $4}' | sed 's/--user=//g'
       register: mysql_user_name
 
-    - name: Register list of mysql credentials for given site
+    - name: Register password as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $5}' | sed 's/--password=//g'
       register: mysql_password
 

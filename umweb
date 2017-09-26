@@ -2,7 +2,7 @@
 dev
 web-2
 
-[staging]
+[stag]
 staging
 
 [prod]
