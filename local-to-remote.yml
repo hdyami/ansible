@@ -63,3 +63,32 @@
         state: absent
       # become: true
 
+    # Set Dest permissions
+    # Change group of the site tld
+    - name: Change group of the site's group recursively
+      file:
+        path: '/cwis/http/remote/htdocs/{{ sitename }}'
+        group: root
+        recurse: yes
+      become: true
+
+    # Change group of the site tld
+    - name: Change group of the site's tld
+      file:
+        path: '/cwis/http/remote/htdocs/{{ sitename }}'
+        group: apache
+      become: true
+
+    # Change ownership of the site tld
+    - name: Change ownership of the site recursively
+      file:
+        path: '/cwis/http/remote/htdocs/{{ sitename }}'
+        owner: '{{ sitename }}'
+        recurse: yes
+
+    # Change group of the site's settings.php
+    - name: Change group of the site's tld
+      file:
+        path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default/settings.php'
+        group: apache
+      become: true
