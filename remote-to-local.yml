@@ -39,19 +39,27 @@
     # Grab the DB credentials
     - name: Register db name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $2}' | sed 's/--database=//g'
+      become: true
       register: mysql_database_name
 
     - name: Register host name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $3}' | sed 's/--host=//g'
+      become: true
       register: mysql_host_name
 
     - name: Register user name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $4}' | sed 's/--user=//g'
+      become: true
       register: mysql_user_name
 
     - name: Register password as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $5}' | sed 's/--password=//g'
-      register: mysql_password
+      become: true
+      register: mysql_password    
+    
+    - name: debug
+      debug:
+        msg: "mysql user name {{ mysql_password.stdout }}"
 
     # Create a db dump remotely
     - name: Dump site DB into a file in the site directory on the remote host
@@ -62,7 +70,8 @@
         login_user: '{{ mysql_user_name.stdout }}'
         login_password: '{{ mysql_password.stdout }}'
         target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
-
+      become: true
+      
     # Copy the db, site files and configuration to local temporary directory
     - name: Pull site directory from remote host to local host
       synchronize:
@@ -83,5 +92,5 @@
       file:
         path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
         state: absent
-      # become: true
+      become: true
 

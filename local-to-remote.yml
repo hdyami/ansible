@@ -54,14 +54,14 @@
         login_user: '{{ mysql_user_name.stdout }}'
         login_password: '{{ mysql_password.stdout }}'
         target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
-
+      become: true
 
     # Cleanup    
     - name: Remove remote db dump
       file:
         path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
         state: absent
-      # become: true
+      become: true
 
     # Set Dest permissions
     # Change group of the site tld
@@ -79,16 +79,22 @@
         group: apache
       become: true
 
-    # Change ownership of the site tld
+    # Change ownership of the site recursively
     - name: Change ownership of the site recursively
       file:
         path: '/cwis/http/remote/htdocs/{{ sitename }}'
-        owner: '{{ sitename }}'
+        owner: '{{ owner }}'
         recurse: yes
+      become: true
 
     # Change group of the site's settings.php
-    - name: Change group of the site's tld
+    - name: Change group of the sites/default/settings.php
       file:
         path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default/settings.php'
         group: apache
+      become: true
+
+    # Enable site using existing script.
+    - name: Enable site
+      shell: '/usr/local/drupal-tools/ensite {{ sitename }}'
       become: true
