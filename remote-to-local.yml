@@ -37,32 +37,62 @@
       delegate_to: localhost
 
     # Grab the DB credentials
+    # dev staging
     - name: Register db name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $2}' | sed 's/--database=//g'
       become: true
       register: mysql_database_name
-
+      when: host == "dev" or host == "staging"
+        
     - name: Register host name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $3}' | sed 's/--host=//g'
       become: true
       register: mysql_host_name
+      when: host == "dev" or host == "staging"
 
     - name: Register user name as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $4}' | sed 's/--user=//g'
       become: true
       register: mysql_user_name
+      when: host == "dev" or host == "staging"
 
     - name: Register password as variable
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $5}' | sed 's/--password=//g'
       become: true
-      register: mysql_password    
+      register: mysql_password
+      when: host == "dev" or host == "staging"
     
+    # prod
+    - name: Register database name as variable
+      shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $2}' | sed 's/--database=//g'
+      become: true
+      register: mysql_database_name
+      when: host == "web-4"
+
+    - name: Register host name as variable
+      shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $3}'
+      become: true
+      register: mysql_host_name
+      when: host == "web-4"
+
+    - name: Register user name as variable
+      shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $4}'
+      become: true
+      register: mysql_user_name
+      when: host == "web-4"
+
+    - name: Register password as variable
+      shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $5}'
+      become: true
+      register: mysql_password
+      when: host == "web-4"
+
     - name: debug
       debug:
-        msg: "mysql user name {{ mysql_password.stdout }}"
+        msg: "mysql host name {{ mysql_host_name.stdout }}"
 
-    # Create a db dump remotely
-    - name: Dump site DB into a file in the site directory on the remote host
+    # Create a db dump remotely on dev or staging
+    - name: Dump site DB into a file in the site directory on the remote host (DEV/STAG)
       mysql_db:
         state: dump
         name: '{{ mysql_database_name.stdout }}'
@@ -71,7 +101,14 @@
         login_password: '{{ mysql_password.stdout }}'
         target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
       become: true
-      
+      when: host == "dev" or host == "staging"
+
+    # For prod- because mysql python module isn't on prod!
+    - name: Dump site DB into a file in the site directory on the remote host (PROD)
+      shell: mysqldump {{ mysql_database_name.stdout }} {{ mysql_host_name.stdout }} {{ mysql_user_name.stdout }} {{ mysql_password.stdout }} > /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql
+      become: true
+      when: host == 'web-4'   
+
     # Copy the db, site files and configuration to local temporary directory
     - name: Pull site directory from remote host to local host
       synchronize:
