@@ -1,0 +1,43 @@
+---
+# backup a site
+- hosts: web-4
+  tasks:
+    # Grab the DB credentials
+    - name: Register db name as variable
+      shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $2}' | sed 's/--database=//g'
+      register: mysql_database_name
+      become: true
+
+    - name: Register host name as variable
+      shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $3}' 
+      register: mysql_host_name
+      become: true
+
+    - name: Register user name as variable
+      shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $4}'
+      register: mysql_user_name
+      become: true
+
+    - name: Register password
+      shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $5}'
+      register: mysql_password
+      become: true
+    
+    # Make the db dump
+    - name: Dump site DB into a file in the site directory on the remote host production
+      shell: mysqldump {{ mysql_database_name.stdout }} {{ mysql_host_name.stdout }} {{ mysql_user_name.stdout }} {{ mysql_password.stdout }} > /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql
+      become: true
+    
+    # Archive    
+    - name: Tarball dump
+      archive:
+        path: '/cwis/http/remote/htdocs/{{ sitename }}'
+        dest: '/cwis/http/remote/www-storage/htdocs-deleted/{{ sitename }}-{{ ansible_date_time.date }}-.tar.gz'
+      become: true
+      
+    # Remove remote db dump
+    - name: Remove remote db dump
+      file:
+        path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+        state: absent
+      become: true

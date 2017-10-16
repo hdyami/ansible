@@ -87,12 +87,12 @@
       register: mysql_password
       when: host == "web-4"
 
-    - name: debug
-      debug:
-        msg: "mysql host name {{ mysql_host_name.stdout }}"
+    # - name: debug
+    #   debug:
+    #     msg: "mysql host name {{ mysql_host_name.stdout }}"
 
     # Create a db dump remotely on dev or staging
-    - name: Dump site DB into a file in the site directory on the remote host (DEV/STAG)
+    - name: Dump site DB into a file in the site directory on the remote host development and staging
       mysql_db:
         state: dump
         name: '{{ mysql_database_name.stdout }}'
@@ -104,7 +104,7 @@
       when: host == "dev" or host == "staging"
 
     # For prod- because mysql python module isn't on prod!
-    - name: Dump site DB into a file in the site directory on the remote host (PROD)
+    - name: Dump site DB into a file in the site directory on the remote host production
       shell: mysqldump {{ mysql_database_name.stdout }} {{ mysql_host_name.stdout }} {{ mysql_user_name.stdout }} {{ mysql_password.stdout }} > /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql
       become: true
       when: host == 'web-4'   
