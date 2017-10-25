@@ -1,5 +1,4 @@
 ---
-# backup a site
 - hosts: '{{ host }}'
   # become: true
   tasks:
@@ -40,6 +39,31 @@
       shell: drush @'{{ sitename }}'-'{{ host }}' sql-connect | awk '{print $5}' | sed 's/--password=//g'
       register: mysql_password
       become: true
+
+    # prod
+    # - name: Register database name as variable on prod
+    #   shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $2}' | sed 's/--database=//g'
+    #   become: true
+    #   register: mysql_database_name
+    #   when: host == "web-4"
+
+    # - name: Register host name as variable on prod
+    #   shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $3}'
+    #   become: true
+    #   register: mysql_host_name
+    #   when: host == "web-4"
+
+    # - name: Register user name as variable on prod
+    #   shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $4}'
+    #   become: true
+    #   register: mysql_user_name
+    #   when: host == "web-4"
+
+    # - name: Register password as variable on prod
+    #   shell: drush @'{{ sitename }}'-prod sql-connect | awk '{print $5}'
+    #   become: true
+    #   register: mysql_password
+    #   when: host == "web-4"
     
     # - name: debug
     #   debug:
@@ -56,6 +80,14 @@
         login_password: '{{ mysql_password.stdout }}'
         target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
       become: true
+      when: host == 'dev' or host == 'staging'
+
+    # PROD import the db dump
+    # - name: Import site DB using drush
+    #   shell: 'drush @{{ sitename }}-prod sqlc < /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+    #   become: true
+      
+
 
     # Cleanup    
     - name: Remove remote db dump
@@ -98,4 +130,13 @@
     # Enable site using existing script.
     - name: Enable site
       shell: '/usr/local/drupal-tools/ensite {{ sitename }}'
+      become: true
+
+    # Clear site cache and rebuild registry  
+    - name: Clear site cache
+      shell: drush @'{{ sitename }}'-'{{ host }}' cc all
+      become: true
+
+    - name: Rebuild registry
+      shell: drush @'{{ sitename }}'-'{{ host }}' rr
       become: true
