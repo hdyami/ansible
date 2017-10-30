@@ -1,0 +1,4 @@
+---
+remotetolocal_conf:
+  alias:
+    - prod

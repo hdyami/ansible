@@ -1,0 +1,106 @@
+---
+- name: "Load settings for the remotetolocal role"
+  include_vars: "{{ host }}.yml"
+
+# Empty tmp folders
+- name: Empty the local site folder
+  file:
+    path: site/
+    state: absent
+  delegate_to: localhost
+  become: true
+
+- name: Empty the local config folder
+  file:
+    path: configuration/
+    state: absent
+  delegate_to: localhost
+  become: true
+
+# Recreate tmp folders because emptying them also deletes them
+- name: Create the local site folder
+  file:
+    path: site
+    owner: hdyami
+    group: hdyami
+    mode: 0755
+    state: directory
+  delegate_to: localhost
+
+- name: Create the local config folder
+  file:
+    path: configuration
+    owner: hdyami
+    group: hdyami
+    mode: 0755
+    state: directory
+  delegate_to: localhost
+
+# prod
+- name: Register database name as variable on prod
+  shell: drush @'{{ sitename }}'-'{{ item }}' sql-connect | awk '{print $2}' | sed 's/--database=//g'
+  become: true
+  register: mysql_database_name
+  with_items: "{{ remotetolocal_conf.alias }}"
+
+- name: Register host name as variable on prod
+  shell: drush @'{{ sitename }}'-'{{ item }}' sql-connect | awk '{print $3}'
+  become: true
+  register: mysql_host_name
+  with_items: "{{ remotetolocal_conf.alias }}"
+
+
+- name: Register user name as variable on prod
+  shell: drush @'{{ sitename }}'-'{{ item }}' sql-connect | awk '{print $4}'
+  become: true
+  register: mysql_user_name
+  with_items: "{{ remotetolocal_conf.alias }}"
+
+- name: Register password as variable on prod
+  shell: drush @'{{ sitename }}'-'{{ item }}' sql-connect | awk '{print $5}'
+  become: true
+  register: mysql_password
+  with_items: "{{ remotetolocal_conf.alias }}"
+  
+- name: debug
+  debug:
+    msg: 'mysql host name {{ mysql_host_name.stdout }}'
+
+# Create a db dump remotely on dev or staging
+- name: Dump site DB into a file in the site directory on the remote host development and staging
+  mysql_db:
+    state: dump
+    name: '{{ mysql_database_name.stdout }}'
+    login_host: '{{ mysql_host_name.stdout }}'
+    login_user: '{{ mysql_user_name.stdout }}'
+    login_password: '{{ mysql_password.stdout }}'
+    target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+  become: true
+
+# For prod- because mysql python module isn't on prod!
+- name: Dump site DB into a file in the site directory on the remote host production
+  shell: mysqldump {{ mysql_database_name.stdout }} {{ mysql_host_name.stdout }} {{ mysql_user_name.stdout }} {{ mysql_password.stdout }} > /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql
+  become: true
+
+# Copy the db, site files and configuration to local temporary directory
+- name: Pull site directory from remote host to local host
+  synchronize:
+    mode: pull
+    src: '/cwis/http/htdocs/{{ sitename }}/'
+    dest: site
+    rsync_path: "sudo -i rsync"
+
+- name: Pull site configuration from remote host to local host
+  synchronize:
+    mode: pull
+    src: '/etc/httpd/conf.d/drupal-available/{{ sitename }}.conf'
+    dest: configuration
+    rsync_path: "sudo -i rsync" 
+
+# Remove remote db dump
+- name: Remove remote db dump
+  file:
+    path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+    state: absent
+  become: true
+
