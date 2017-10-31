@@ -37,49 +37,50 @@
   delegate_to: localhost
 
 # prod
-- name: Register database name as variable on prod
-  shell: drush @'{{ sitename }}'-'{{ item }}' sql-connect | awk '{print $2}' | sed 's/--database=//g'
+- name: Register database name as variable
+  shell: "drush @{{ sitename }}-{{ item }} sql-connect | awk '{print $2}' | sed 's/--database=//g'"
   become: true
   register: mysql_database_name
   with_items: "{{ remotetolocal_conf.alias }}"
 
-- name: Register host name as variable on prod
-  shell: drush @'{{ sitename }}'-'{{ item }}' sql-connect | awk '{print $3}'
+# - name: debug
+#   debug:
+#     msg: '{{ mysql_database_name.results[0].stdout }}'
+
+- name: Register host name as variable
+  shell: "drush @{{ sitename }}-{{ item }} sql-connect | awk '{print $3}'"
   become: true
   register: mysql_host_name
   with_items: "{{ remotetolocal_conf.alias }}"
 
-
-- name: Register user name as variable on prod
-  shell: drush @'{{ sitename }}'-'{{ item }}' sql-connect | awk '{print $4}'
+- name: Register user name as variable
+  shell: "drush @{{ sitename }}-{{ item }} sql-connect | awk '{print $4}'"
   become: true
   register: mysql_user_name
   with_items: "{{ remotetolocal_conf.alias }}"
 
-- name: Register password as variable on prod
-  shell: drush @'{{ sitename }}'-'{{ item }}' sql-connect | awk '{print $5}'
+- name: Register password as variable
+  shell: "drush @{{ sitename }}-{{ item }} sql-connect | awk '{print $5}'"
   become: true
   register: mysql_password
   with_items: "{{ remotetolocal_conf.alias }}"
   
-- name: debug
-  debug:
-    msg: 'mysql host name {{ mysql_host_name.stdout }}'
+
 
 # Create a db dump remotely on dev or staging
-- name: Dump site DB into a file in the site directory on the remote host development and staging
-  mysql_db:
-    state: dump
-    name: '{{ mysql_database_name.stdout }}'
-    login_host: '{{ mysql_host_name.stdout }}'
-    login_user: '{{ mysql_user_name.stdout }}'
-    login_password: '{{ mysql_password.stdout }}'
-    target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
-  become: true
+# - name: Dump site DB into a file in the site directory on the remote host development and staging
+#   mysql_db:
+#     state: dump
+#     name: '{{ mysql_database_name.stdout }}'
+#     login_host: '{{ mysql_host_name.stdout }}'
+#     login_user: '{{ mysql_user_name.stdout }}'
+#     login_password: '{{ mysql_password.stdout }}'
+#     target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+#   become: true
 
 # For prod- because mysql python module isn't on prod!
 - name: Dump site DB into a file in the site directory on the remote host production
-  shell: mysqldump {{ mysql_database_name.stdout }} {{ mysql_host_name.stdout }} {{ mysql_user_name.stdout }} {{ mysql_password.stdout }} > /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql
+  shell: mysqldump {{ mysql_database_name.results[0].stdout }} {{ mysql_host_name.results[0].stdout }} {{ mysql_user_name.results[0].stdout }} {{ mysql_password.results[0].stdout }} > /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql
   become: true
 
 # Copy the db, site files and configuration to local temporary directory
