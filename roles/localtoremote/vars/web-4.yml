@@ -1,0 +1,4 @@
+---
+localtoremote_conf:
+  alias:
+    - prod

@@ -66,18 +66,6 @@
   with_items: "{{ remotetolocal_conf.alias }}"
   
 
-
-# Create a db dump remotely on dev or staging
-# - name: Dump site DB into a file in the site directory on the remote host development and staging
-#   mysql_db:
-#     state: dump
-#     name: '{{ mysql_database_name.stdout }}'
-#     login_host: '{{ mysql_host_name.stdout }}'
-#     login_user: '{{ mysql_user_name.stdout }}'
-#     login_password: '{{ mysql_password.stdout }}'
-#     target: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
-#   become: true
-
 # For prod- because mysql python module isn't on prod!
 - name: Dump site DB into a file in the site directory on the remote host production
   shell: mysqldump {{ mysql_database_name.results[0].stdout }} {{ mysql_host_name.results[0].stdout }} {{ mysql_user_name.results[0].stdout }} {{ mysql_password.results[0].stdout }} > /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql
