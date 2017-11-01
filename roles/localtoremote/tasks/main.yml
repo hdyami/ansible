@@ -73,6 +73,23 @@
     recurse: yes
   become: true
 
+# Change ownership of sites/default only
+- name: Change ownership of sites/default
+  file:
+    path: '/cwis/http/remote/htdocs/{{ sitename }}sites/default'
+    group: apache
+    mode: 0775
+  become: true
+
+# Change ownership of sites/default/files recursively
+- name: Change ownership of sites/default/files recursively
+  file:
+    path: '/cwis/http/remote/htdocs/{{ sitename }}sites/default/files'
+    group: apache
+    mode: 1775
+    recurse: yes
+  become: true
+
 # Change group of the site's settings.php
 - name: Change group of the sites/default/settings.php
   file:
