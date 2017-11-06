@@ -3,6 +3,15 @@
 - name: "Load settings for the localtoremote role"
   include_vars: "{{ host }}.yml"
 
+# Make sure everything in the local site container folder is readable by the user invoking ansible-playbook
+- name: Make sure everything in the local site container folder is readable by the user invoking ansible-playbook
+  file:
+    path: site/
+    # state: directory
+    recurse: yes
+    mode: "u+r"
+  delegate_to: localhost
+
 # Copy the db, site files and configuration to local temporary directory
 - name: Push site directory from local host to remote host
   synchronize:
@@ -11,6 +20,7 @@
     src: site/
     delete: yes
     rsync_path: "sudo -i rsync"
+  become: true
 
 - name: Push site configuration from local host to remote host
   synchronize:
@@ -23,18 +33,6 @@
 # Import the sql dump
 - name: Import the sql dump
   shell: "drush @{{ sitename }}-{{ item }} sqlc < /cwis/http/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql"
-  become: true
-  with_items: "{{ localtoremote_conf.alias }}"
-
-# Clear the drupal cache
-- name: Clear the drupal cache
-  shell: "drush @{{ sitename }}-{{ item }} cc all"
-  become: true
-  with_items: "{{ localtoremote_conf.alias }}"
-
-# Import the sql dump
-- name: Import the sql dump
-  shell: "drush @{{ sitename }}-{{ item }} rr"
   become: true
   with_items: "{{ localtoremote_conf.alias }}"
 
@@ -73,10 +71,18 @@
     recurse: yes
   become: true
 
-# Change ownership of sites/default only
-- name: Change ownership of sites/default
+# Change ownership of sites sites
+- name: Change ownership of sites only
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}sites/default'
+    path: '/cwis/http/remote/htdocs/{{ sitename }}/sites'
+    group: apache
+    mode: 0775
+  become: true
+
+# Change ownership of sites/default
+- name: Change ownership of sites/default only
+  file:
+    path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default'
     group: apache
     mode: 0775
   become: true
@@ -84,7 +90,7 @@
 # Change ownership of sites/default/files recursively
 - name: Change ownership of sites/default/files recursively
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}sites/default/files'
+    path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default/files'
     group: apache
     mode: 1775
     recurse: yes
@@ -96,6 +102,18 @@
     path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default/settings.php'
     group: apache
   become: true
+
+# Clear the drupal cache
+- name: Clear the drupal cache
+  shell: "drush @{{ sitename }}-{{ item }} cc all"
+  become: true
+  with_items: "{{ localtoremote_conf.alias }}"
+
+# Import the sql dump
+- name: Clear the drupal registry
+  shell: "drush @{{ sitename }}-{{ item }} rr"
+  become: true
+  with_items: "{{ localtoremote_conf.alias }}"
 
 # Enable site using existing script.
 - name: Enable site
