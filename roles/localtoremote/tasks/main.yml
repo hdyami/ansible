@@ -28,7 +28,8 @@
     dest: '/etc/httpd/conf.d/drupal-available/{{ sitename }}.conf'
     src: 'configuration/{{ sitename }}.conf'
     delete: yes
-    rsync_path: "sudo -i rsync" 
+    rsync_path: "sudo -i rsync"
+  become: true
 
 # Import the sql dump
 - name: Import the sql dump

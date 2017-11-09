@@ -8,14 +8,14 @@
     path: site/
     state: absent
   delegate_to: localhost
-  become: true
+  # become: true
 
 - name: Empty the local config folder
   file:
     path: configuration/
     state: absent
   delegate_to: localhost
-  become: true
+  # become: true
 
 # Recreate tmp folders because emptying them also deletes them
 - name: Create the local site folder
