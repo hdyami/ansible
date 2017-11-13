@@ -1,0 +1,4 @@
+---
+sitebackup_conf:
+  alias:
+    - staging
