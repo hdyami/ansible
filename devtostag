@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -ne 2 ]
+then
+  echo "Improper number of arguments."
+  echo "FORMAT dev-to-stag <SITENAME> <OWNER>"
+  exit
+fi
+
+read -p "You are about to destroy data for $1 on STAGING and replace it with DEVELOPMENT owned by NETID $2. Continue (y/n)? " -n 1
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+  echo
+  exit 1
+else
+  echo
+fi
+
+ansible-playbook remotetolocal.yml -e "sitename=$1 host=dev"
+ansible-playbook localtoremote.yml -e "sitename=$1 host=staging owner=$2"
