@@ -48,7 +48,7 @@
     state: absent
   become: true
 
-# Set Dest permissions
+######## Set Dest permissions #########
 # Change group of the site tld
 - name: Change group of the site's group recursively
   file:
@@ -93,7 +93,7 @@
   file:
     path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default/files'
     group: apache
-    mode: 1775
+    mode: 0775
     recurse: yes
   become: true
 
