@@ -1,0 +1,4 @@
+---
+fixpermissions_conf:
+  alias:
+    - prod

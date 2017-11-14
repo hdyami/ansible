@@ -1,53 +1,4 @@
 ---
-# backup a site
-- name: "Load settings for the localtoremote role"
-  include_vars: "{{ host }}.yml"
-
-# Make sure everything in the local site container folder is readable by the user invoking ansible-playbook
-- name: Make sure everything in the local site container folder is readable by the user invoking ansible-playbook
-  file:
-    path: site/
-    # state: directory
-    recurse: yes
-    mode: "u+r"
-  delegate_to: localhost
-
-# Copy the db, site files and configuration to local temporary directory
-- name: Push site directory from local host to remote host
-  synchronize:
-    mode: push
-    dest: '/cwis/http/htdocs/{{ sitename }}'
-    src: site/
-    delete: yes
-    rsync_path: "sudo -i rsync"
-  become: true
-
-- name: Push site configuration from local host to remote host
-  synchronize:
-    mode: push
-    dest: '/etc/httpd/conf.d/drupal-available/{{ sitename }}.conf'
-    src: 'configuration/{{ sitename }}.conf'
-    delete: yes
-    rsync_path: "sudo -i rsync"
-  become: true
-
-# Import the sql dump
-- name: Import the sql dump
-  shell: "drush @{{ sitename }}-{{ item }} sqlc < /cwis/http/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql"
-  become: true
-  with_items: "{{ localtoremote_conf.alias }}"
-
-# - name: debug
-#   debug:
-#     msg: "mysql user name {{ mysql_database_name.stdout }}"
-
-# Cleanup    
-- name: Remove remote db dump
-  file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
-    state: absent
-  become: true
-
 # Change group of the site tld
 - name: Change group of the site's group recursively
   file:
@@ -114,8 +65,3 @@
   shell: "drush @{{ sitename }}-{{ item }} rr"
   become: true
   with_items: "{{ localtoremote_conf.alias }}"
-
-# Enable site using existing script.
-- name: Enable site
-  shell: '/usr/local/drupal-tools/ensite {{ sitename }}'
-  become: true

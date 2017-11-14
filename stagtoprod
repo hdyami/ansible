@@ -15,5 +15,6 @@ else
   echo
 fi
 
+ansible-playbook sitebackup.yml -e "sitename=$1 host=web-4"
 ansible-playbook remotetolocal.yml -e "sitename=$1 host=staging"
 ansible-playbook localtoremote.yml -e "sitename=$1 host=web-4 owner=$2"
