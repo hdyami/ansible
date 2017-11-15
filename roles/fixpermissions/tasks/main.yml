@@ -1,4 +1,6 @@
 ---
+- name: "Load settings for the fixpermissions role"
+  include_vars: "{{ host }}.yml"
 # Change group of the site tld
 - name: Change group of the site's group recursively
   file:
@@ -58,10 +60,10 @@
 - name: Clear the drupal cache
   shell: "drush @{{ sitename }}-{{ item }} cc all"
   become: true
-  with_items: "{{ localtoremote_conf.alias }}"
+  with_items: "{{ fixpermissions_conf.alias }}"
 
 # Import the sql dump
 - name: Clear the drupal registry
   shell: "drush @{{ sitename }}-{{ item }} rr"
   become: true
-  with_items: "{{ localtoremote_conf.alias }}"
+  with_items: "{{ fixpermissions_conf.alias }}"

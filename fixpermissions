@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -ne 3 ]
+then
+  echo "Improper number of arguments."
+  echo "FORMAT fixpermissions <SITENAME> <HOST> <OWNER>"
+  exit
+fi
+
+read -p "You are about to alter the permissions for $1 on $2 and make $1 owned by $3. Continue (y/n)? " -n 1
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+  echo
+  exit 1
+else
+  echo
+fi
+
+ansible-playbook fixpermissions.yml -e "sitename=$1 host=$2 owner=$3"
+  
