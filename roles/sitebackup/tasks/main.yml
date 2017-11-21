@@ -26,19 +26,19 @@
 
 # Make the db dump
 - name: Dump site DB into a file in the site directory on the remote host production
-  shell: mysqldump {{ mysql_database_name.stdout }} {{ mysql_host_name.stdout }} {{ mysql_user_name.stdout }} {{ mysql_password.stdout }} > /cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql
+  shell: mysqldump {{ mysql_database_name.stdout }} {{ mysql_host_name.stdout }} {{ mysql_user_name.stdout }} {{ mysql_password.stdout }} > {{ sitebackup_conf.d7webdir }}{{ sitename }}/{{ sitename }}_drpl.sql
   become: true
 
 # Archive    
 - name: Tarball dump
   archive:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}'
+    path: '{{ sitebackup_conf.d7webdir }}{{ sitename }}'
     dest: '/cwis/http/remote/www-storage/htdocs-deleted/{{ sitename }}-{{ ansible_date_time.date }}-.tar.gz'
   become: true
   
 # Remove remote db dump
 - name: Remove remote db dump
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}/{{ sitename }}_drpl.sql'
+    path: '{{ sitebackup_conf.d7webdir }}{{ sitename }}/{{ sitename }}_drpl.sql'
     state: absent
   become: true

@@ -4,7 +4,7 @@
 # Change group of the site tld
 - name: Change group of the site's group recursively
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}'
+    path: '{{ fixpermissions_conf.d7webdir }}{{ sitename }}'
     group: root
     recurse: yes
   become: true
@@ -12,14 +12,14 @@
 # Change group of the site tld
 - name: Change group of the site's tld
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}'
+    path: '{{ fixpermissions_conf.d7webdir }}{{ sitename }}'
     group: apache
   become: true
 
 # Change ownership of the site recursively
 - name: Change ownership of the site recursively
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}'
+    path: '{{ fixpermissions_conf.d7webdir }}{{ sitename }}'
     owner: '{{ owner }}'
     recurse: yes
   become: true
@@ -27,7 +27,7 @@
 # Change ownership of sites sites
 - name: Change ownership of sites only
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}/sites'
+    path: '{{ fixpermissions_conf.d7webdir }}{{ sitename }}/sites'
     group: apache
     mode: 0775
   become: true
@@ -35,7 +35,7 @@
 # Change ownership of sites/default
 - name: Change ownership of sites/default only
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default'
+    path: '{{ fixpermissions_conf.d7webdir }}{{ sitename }}/sites/default'
     group: apache
     mode: 0775
   become: true
@@ -43,7 +43,7 @@
 # Change ownership of sites/default/files recursively
 - name: Change ownership of sites/default/files recursively
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default/files'
+    path: '{{ fixpermissions_conf.d7webdir }}{{ sitename }}/sites/default/files'
     group: apache
     mode: 0775
     recurse: yes
@@ -52,7 +52,7 @@
 # Change group of the site's settings.php
 - name: Change group of the sites/default/settings.php
   file:
-    path: '/cwis/http/remote/htdocs/{{ sitename }}/sites/default/settings.php'
+    path: '{{ fixpermissions_conf.d7webdir }}{{ sitename }}/sites/default/settings.php'
     group: apache
   become: true
 

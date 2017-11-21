@@ -1,4 +1,5 @@
 ---
 fixpermissions_conf:
-  alias:
-    - prod
+  alias: prod
+  d7webdir: /cwis/http/htdocs/
+  d8webdir: /var/www/

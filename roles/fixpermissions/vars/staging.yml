@@ -1,4 +1,6 @@
 ---
 fixpermissions_conf:
-  alias:
-    - staging
+  alias: staging
+  d7webdir: /cwis/http/htdocs/
+  d8webdir: /var/www/
+
