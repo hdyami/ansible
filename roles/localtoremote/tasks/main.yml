@@ -9,7 +9,7 @@
     path: site/
     # state: directory
     recurse: yes
-    mode: "u+r"
+    mode: "u+wr"
   delegate_to: localhost
 
 # Copy the db, site files and configuration to local temporary directory
@@ -44,7 +44,7 @@
 # Cleanup    
 - name: Remove remote db dump
   file:
-    path: '{{ fixpermissions_conf.d7webdir }}{{ sitename }}/{{ sitename }}_drpl.sql'
+    path: '{{ localtoremote_conf.d7webdir }}{{ sitename }}/{{ sitename }}_drpl.sql'
     state: absent
   become: true
 
@@ -101,6 +101,14 @@
   file:
     path: '{{ localtoremote_conf.d7webdir }}{{ sitename }}/sites/default/settings.php'
     group: apache
+  become: true
+
+# Change ownership of the site's configuration
+- name: Change ownership of the site's configuration
+  file:
+    path: '/etc/httpd/conf.d/drupal-available/{{ sitename }}.conf'
+    owner: root
+    group: root
   become: true
 
 # Clear the drupal cache
