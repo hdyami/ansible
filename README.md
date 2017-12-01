@@ -36,15 +36,25 @@ UMass Fork of default apache disable site functionality
 ### ensite
 UMass Fork of default apache enable site functionality
 
-## deprovision-d7
+### deprovision-d7
 backup the site along with a copy of it's configuration and delete it; restart apache
 
-## shibprovision
+### shibprovision
 register all users or given a username create relationship between drupal uid and shib
 
-## addmodule
+### addmodule
 Add a module for a user
 **Arguments** [SITENAME] [HOST] [MODULENAME]
 
-## secpatch
+### secpatch
 Pull a site down to staging, update drupal core and update drupal contrib using the --security-only flag ** * ** on a single site or all sites
+
+### addrewrite
+Add a rewrite from one url to another url
+**Arguments** [SITENAME] [HOST] [FROMURL] [TOURL]
+
+### removerewrite
+removes a rewrite
+
+### updaterewrite
+changes a rewrites

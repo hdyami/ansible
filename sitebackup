@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -ne 3 ]
+then
+  echo "Improper number of arguments."
+  echo "FORMAT sitename <SITENAME> <HOST> (web-4 only at this time)"
+  exit
+fi
+
+read -p "You are archive for $1. Continue (y/n)? " -n 1
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+  echo
+  exit 1
+else
+  echo
+fi
+
+ansible-playbook sitebackup.yml -e "sitename=$1 host=$2"
+  
